@@ -39,7 +39,23 @@ class WishWallPage extends StatelessWidget {
           separatorBuilder: (context, index) => const Divider(height: 1),
           itemBuilder: (context, index) {
             final item = items[index];
-            return WishItemTile(item: item);
+            return WishItemTile(
+              item: item,
+              onDelete: () async {
+                try {
+                  await FirestoreService.deleteWishItem(item.id);
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Item excluído com sucesso.')),
+                  );
+                } catch (error) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Erro ao excluir item: $error')),
+                  );
+                }
+              },
+            );
           },
         );
       },

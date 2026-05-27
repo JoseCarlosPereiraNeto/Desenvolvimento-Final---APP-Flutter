@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../models/wish_item.dart';
 import '../services/firestore_service.dart';
 
@@ -14,7 +17,25 @@ class _NewItemPageState extends State<NewItemPage> {
   final _nameController = TextEditingController();
   final _valueController = TextEditingController();
   final _storeController = TextEditingController();
+  final ImagePicker _picker = ImagePicker();
+  List<XFile> _selectedImages = [];
   bool _isSaving = false;
+
+  Future<void> _pickImages() async {
+    try {
+      final images = await _picker.pickMultiImage(imageQuality: 80);
+      if (images.isNotEmpty) {
+        setState(() {
+          _selectedImages = images;
+        });
+      }
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao selecionar imagens: $error')),
+      );
+    }
+  }
 
   Future<void> _saveItem() async {
     if (!_formKey.currentState!.validate()) {
@@ -24,6 +45,7 @@ class _NewItemPageState extends State<NewItemPage> {
     final name = _nameController.text.trim();
     final value = double.tryParse(_valueController.text.replaceAll(',', '.')) ?? 0.0;
     final storeUrl = _storeController.text.trim();
+    final imageUrls = _selectedImages.map((file) => file.path).toList();
 
     setState(() {
       _isSaving = true;
@@ -34,6 +56,7 @@ class _NewItemPageState extends State<NewItemPage> {
       name: name,
       value: value,
       storeUrl: storeUrl,
+      imageUrls: imageUrls,
     );
 
     try {
@@ -46,6 +69,9 @@ class _NewItemPageState extends State<NewItemPage> {
       _nameController.clear();
       _valueController.clear();
       _storeController.clear();
+      setState(() {
+        _selectedImages = [];
+      });
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -131,6 +157,46 @@ class _NewItemPageState extends State<NewItemPage> {
                 return null;
               },
             ),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              icon: const Icon(Icons.photo_library_outlined),
+              label: const Text('Selecionar imagens da galeria'),
+              onPressed: _pickImages,
+            ),
+            if (_selectedImages.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Text('Imagens selecionadas: ${_selectedImages.length}'),
+              const SizedBox(height: 12),
+              SizedBox(
+                height: 120,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: _selectedImages.length,
+                  separatorBuilder: (context, index) => const SizedBox(width: 10),
+                  itemBuilder: (context, index) {
+                    final file = _selectedImages[index];
+                    return ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.file(
+                        File(file.path),
+                        width: 120,
+                        height: 120,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: 120,
+                            height: 120,
+                            color: Colors.grey.shade200,
+                            alignment: Alignment.center,
+                            child: const Icon(Icons.broken_image, color: Colors.grey),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
             const SizedBox(height: 24),
             FilledButton.tonal(
               onPressed: _isSaving ? null : _saveItem,

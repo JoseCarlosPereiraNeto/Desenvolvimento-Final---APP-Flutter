@@ -17,4 +17,8 @@ class FirestoreService {
   static Future<void> addWishItem(WishItem item) {
     return _wishCollection.add(item.toMap());
   }
+
+  static Future<void> deleteWishItem(String id) {
+    return _wishCollection.doc(id).delete();
+  }
 }
