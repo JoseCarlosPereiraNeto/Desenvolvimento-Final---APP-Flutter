@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "813569351018",
+    "project_id": "applistadesejos-5d1a4",
+    "storage_bucket": "applistadesejos-5d1a4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:813569351018:android:25cbb8bd37a7ca523f9913",
+        "android_client_info": {
+          "package_name": "com.example.app_lista_desejos"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0HwCHhyeuHo37NMev9ZfJJ41h9TgT908"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
